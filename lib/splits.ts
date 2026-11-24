@@ -79,3 +79,40 @@ export function apportion(total: number, weights: number[]): number[] {
   }
   return base;
 }
+
+export function computeSplit(total: number, recipients: Recipient[]): SplitPlan {
+  if (!Number.isInteger(total) || total < 0) {
+    throw new Error('amount must be a whole, non-negative number of sats');
+  }
+  const valid = recipients.filter((r) => Number.isFinite(r.split) && r.split > 0);
+  const sats = new Map<Recipient, number>();
+
+  const fees = valid.filter((r) => r.fee);
+  const rest = valid.filter((r) => !r.fee);
+  const feePercent = fees.reduce((a, r) => a + r.split, 0);
+
+  if (rest.length === 0 || feePercent >= 100) {
+    // Rule 4: nothing sensible to take "off the top" from, share by weight.
+    const out = apportion(total, valid.map((r) => r.split));
+    valid.forEach((r, i) => sats.set(r, out[i]));
+  } else {
+    let feeTotal = 0;
+    for (const r of fees) {
+      const s = Math.floor((total * r.split) / 100);
+      sats.set(r, s);
+      feeTotal += s;
+    }
+    const out = apportion(total - feeTotal, rest.map((r) => r.split));
+    rest.forEach((r, i) => sats.set(r, out[i]));
+  }
+
+  const shares: Share[] = valid.map((r) => ({
+    recipient: r,
+    ...railFor(r),
+    sats: sats.get(r) ?? 0,
+  }));
+  const payable = shares
+    .filter((s) => s.rail === 'cashu')
+    .reduce((a, s) => a + s.sats, 0);
+  return { total, shares, payable, kept: total - payable };
+}
