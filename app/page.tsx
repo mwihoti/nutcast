@@ -784,6 +784,38 @@ export default function ListenerPage() {
           </section>
 
           <section className="card">
+            <h2>Listen to another show</h2>
+            <form
+              className="stack"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const url = feedInput.trim();
+                window.location.search = url ? `?feed=${encodeURIComponent(url)}` : '';
+              }}
+            >
+              <label className="field">
+                Podcast feed address (https)
+                <input
+                  type="text"
+                  inputMode="url"
+                  value={feedInput}
+                  placeholder="https://example.com/feed.xml"
+                  onChange={(e) => setFeedInput(e.target.value)}
+                />
+              </label>
+              <div className="row">
+                <button type="submit" className="btn ghost">
+                  Load show
+                </button>
+                {feedSource && <a href="/">Back to the demo show</a>}
+              </div>
+            </form>
+            <p className="muted small gap-top">
+              Any public Podcasting 2.0 feed loads. Only recipients with an ecash payment request can be paid.
+            </p>
+          </section>
+
+          <section className="card">
             <h2>Receipts</h2>
             {receipts.length === 0 && <p className="muted">Nothing sent yet.</p>}
             {receipts.map((r) => (
