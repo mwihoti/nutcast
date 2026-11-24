@@ -92,3 +92,32 @@ npm run build
 If the default mint charges input fees, each recipient payment costs a few sats and small stream payments are held back until fees are under half of them. To see every 30-second payment go out in a demo, use `NUTCAST_MINTS=https://nofees.testnut.cashu.space`.
 
 **Hosting:** the file inbox needs a server with a disk that persists. On a serverless host it will lose payments between invocations, so set the Redis variables there.
+
+## How it works
+
+```text
+listener browser                       server                    creator browser
+----------------                       ------                    ---------------
+wallet (cashu-ts, localStorage)
+accrual: media time -> sats, capped
+split: value block -> whole sats
+pay: swap to P2PK-locked proofs  --->  POST /api/ecash
+     (journal first, then POST)        verify, store locked ---> GET /api/inbox (signed)
+                                                                 redeem: swap with own key
+                                                                 cash out: melt to bolt11
+```
+
+- **`lib/accrual.ts`**: pure. Sats are tracked in sat-seconds, so fractions carry over. The caps are enforced here, before any payment is attempted.
+- **`lib/splits.ts`**: pure. Fee recipients come off the top, the rest is shared by weight in whole sats, largest remainder first, ties to the earlier recipient.
+- **`lib/pay.ts`**: one function behind boosts and stream flushes. Each share is swapped into proofs locked to the recipient, written to a journal, then POSTed. A closed tab or dead connection never loses a payment: it is re-sent on next open, and the receiver refuses duplicates.
+- **`lib/verify.ts`**: the receive endpoint accepts proofs only from a mint it chose, in sats, carrying exactly the recipient's P2PK lock, with a valid mint signature (DLEQ), and unspent at the mint.
+- **`lib/store.ts`**: the server stores only locked proofs. It cannot spend them. Reading an inbox needs a signature from the creator's key, because boost messages are personal.
+
+### Protocol pieces used
+
+[NUT-04](https://cashubtc.github.io/nuts/04/) mint, [NUT-05](https://cashubtc.github.io/nuts/05/) melt, [NUT-07](https://cashubtc.github.io/nuts/07/) state check, [NUT-08](https://cashubtc.github.io/nuts/08/) fee return, [NUT-11](https://cashubtc.github.io/nuts/11/) P2PK, [NUT-12](https://cashubtc.github.io/nuts/12/) DLEQ, [NUT-18](https://cashubtc.github.io/nuts/18/) payment requests over HTTP POST, via [`@cashu/cashu-ts`](https://www.npmjs.com/package/@cashu/cashu-ts) 4.13.
+
+### Conventions that are not official
+
+- `<podcast:valueRecipient type="cashu" address="creqA…">` and `<podcast:txt purpose="cashu">` are community conventions, following Nodesignal's CASHU_STREAMING proposal. They are not registered Podcasting 2.0 values.
+- The receive endpoint takes `?action=stream` or `?action=boost`, and `?episode=`, in the same spirit. A stream payment never stores a message.
