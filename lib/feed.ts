@@ -72,3 +72,39 @@ function parseValue(nodes: unknown): ValueBlock | undefined {
     recipients,
   };
 }
+
+export function parseFeed(xml: string): Feed {
+  const doc = parser.parse(xml) as Node;
+  const channel = ((doc.rss as Node | undefined)?.channel ?? undefined) as Node | undefined;
+  if (!channel) throw new Error('not an RSS feed: no <channel> found');
+
+  const txt = (channel['podcast:txt'] as Node[] | string[] | undefined) ?? [];
+  let showCashuRequest: string | undefined;
+  for (const t of txt) {
+    if (typeof t === 'object' && String(t['@purpose'] ?? '').toLowerCase() === 'cashu') {
+      showCashuRequest = text(t).trim() || undefined;
+    }
+  }
+
+  const episodes = ((channel.item as Node[] | undefined) ?? []).map((item, i): Episode => {
+    const enclosure = item.enclosure as Node | undefined;
+    return {
+      guid: text(item.guid) || `item-${i}`,
+      title: text(item.title) || `Episode ${i + 1}`,
+      audioUrl: enclosure ? String(enclosure['@url'] ?? '') || undefined : undefined,
+      value: parseValue(item['podcast:value']),
+    };
+  });
+
+  return {
+    title: text(channel.title) || 'Untitled show',
+    value: parseValue(channel['podcast:value']),
+    showCashuRequest,
+    episodes,
+  };
+}
+
+/** Item-level block wins over the channel block. */
+export function valueFor(feed: Feed, episode: Episode): ValueBlock | undefined {
+  return episode.value ?? feed.value;
+}
