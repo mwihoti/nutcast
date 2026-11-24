@@ -426,6 +426,23 @@ export default function CreatorPage() {
             </div>
           </section>
 
+          <section className="card">
+            <h2>Get paid</h2>
+            <p className="small">Your payment request (NUT-18, reusable, any amount):</p>
+            <div className="code gap-top">{creq}</div>
+            <div className="row gap-top">
+              <Copy text={creq} label="Copy request" />
+            </div>
+            <p className="small gap-top">To receive a share of a show, add this to the feed’s value block:</p>
+            <div className="code gap-top">{snippet}</div>
+            <div className="row gap-top">
+              <Copy text={snippet} label="Copy feed line" />
+            </div>
+            <p className="muted small gap-top">
+              <code>type=&quot;cashu&quot;</code> is a community convention, not an official Podcasting 2.0 recipient
+              type. Players that do not know it will skip this line.
+            </p>
+          </section>
         </div>
       </div>
     </main>
