@@ -783,6 +783,34 @@ export default function ListenerPage() {
             </div>
           </section>
 
+          <section className="card">
+            <h2>Receipts</h2>
+            {receipts.length === 0 && <p className="muted">Nothing sent yet.</p>}
+            {receipts.map((r) => (
+              <div className="receipt" key={r.id}>
+                <div className="row between">
+                  <span className={`pill ${r.action === 'boost' ? '' : 'on'}`}>{r.action}</span>
+                  <span className="mono small">
+                    {r.sent} sats{r.fees ? ` + ${r.fees} fee` : ''} · {new Date(r.at).toLocaleTimeString()}
+                  </span>
+                </div>
+                {r.message && <p className="msg">“{r.message}”</p>}
+                <table>
+                  <tbody>
+                    {r.lines.map((l, i) => (
+                      <tr key={i}>
+                        <td>{l.name}</td>
+                        <td className="small muted" title={l.note}>
+                          {STATUS_LABEL[l.status] ?? l.status}
+                        </td>
+                        <td className="num">{l.sats}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </section>
         </div>
       </div>
     </main>
