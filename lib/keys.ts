@@ -59,3 +59,32 @@ export function makeCreq(origin: string, pubkey: string, mint: string, descripti
   );
   return req.toEncodedCreqA();
 }
+
+// --- inbox handshake -------------------------------------------------------
+// The inbox holds locked tokens nobody else can spend, but boost messages are
+// personal, so reading it needs a signature from the creator's key.
+
+const WINDOW_MS = 5 * 60 * 1000;
+
+export function inboxMessage(pubkey: string, ts: number, action: string): string {
+  return `nutcast:${action}:${pubkey}:${ts}`;
+}
+
+export function signInbox(kp: KeyPair, action: string, ts = Date.now()) {
+  return { pubkey: kp.pubkey, ts, sig: schnorrSignMessage(inboxMessage(kp.pubkey, ts, action), kp.privkey) };
+}
+
+export function verifyInbox(
+  pubkey: string,
+  ts: number,
+  sig: string,
+  action: string,
+  now = Date.now(),
+): boolean {
+  if (!isPubkey(pubkey) || !Number.isFinite(ts) || Math.abs(now - ts) > WINDOW_MS) return false;
+  try {
+    return schnorrVerifyMessage(sig, inboxMessage(pubkey, ts, action), pubkey);
+  } catch {
+    return false;
+  }
+}
