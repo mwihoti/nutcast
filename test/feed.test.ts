@@ -55,3 +55,30 @@ describe('demo feed', () => {
     expect(new URL(targetFor(creq, 'boost')).searchParams.get('action')).toBe('boost');
   });
 });
+
+describe('real-world feed shapes', () => {
+  test('item-level block overrides the channel, and non-Cashu recipients are kept', () => {
+    const xml = `<rss><channel><title>Show</title>
+      <podcast:value type="lightning" method="keysend">
+        <podcast:valueRecipient name="Node" type="node" address="02abc" split="100"/>
+      </podcast:value>
+      <item><title>One</title><guid>g1</guid>
+        <podcast:value type="lightning" method="lnaddress">
+          <podcast:valueRecipient name="Host" type="lnaddress" address="host@example.com" split="90"/>
+          <podcast:valueRecipient name="App" type="lnaddress" address="app@example.com" split="10" fee="true"/>
+        </podcast:value>
+      </item>
+      <item><title>Two</title><guid>g2</guid></item>
+    </channel></rss>`;
+    const feed = parseFeed(xml);
+    expect(valueFor(feed, feed.episodes[0])!.recipients).toHaveLength(2);
+    expect(valueFor(feed, feed.episodes[1])!.recipients[0].type).toBe('node');
+    const plan = computeSplit(100, valueFor(feed, feed.episodes[0])!.recipients);
+    expect(plan.payable).toBe(0);
+    expect(plan.kept).toBe(100);
+  });
+
+  test('rejects something that is not a feed', () => {
+    expect(() => parseFeed('<html></html>')).toThrow();
+  });
+});
