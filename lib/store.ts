@@ -105,11 +105,57 @@ class FileStore implements InboxStore {
   }
 }
 
+// --- redis (REST) adapter ------------------------------------------------------
+
+class RedisStore implements InboxStore {
+  constructor(private url: string, private token: string) {}
+
+  private async cmd<T>(...args: (string | number)[]): Promise<T> {
+    const res = await fetch(this.url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(args),
+      cache: 'no-store',
+    });
+    const json = (await res.json()) as { result?: T; error?: string };
+    if (!res.ok || json.error) throw new Error(`redis: ${json.error ?? res.status}`);
+    return json.result as T;
+  }
+
+  async add(entry: InboxEntry) {
+    // SADD returns how many members were new. Fewer than all means a replay.
+    const added = await this.cmd<number>('SADD', 'nutcast:secrets', ...entry.proofs.map((p) => p.secret));
+    if (added !== entry.proofs.length) return false;
+    await this.cmd('HSET', `nutcast:inbox:${entry.to}`, entry.id, JSON.stringify(entry));
+    return true;
+  }
+
+  async list(pubkey: string) {
+    const flat = (await this.cmd<string[] | null>('HGETALL', `nutcast:inbox:${pubkey}`)) ?? [];
+    const out: InboxEntry[] = [];
+    for (let i = 1; i < flat.length; i += 2) out.push(JSON.parse(flat[i]) as InboxEntry);
+    return out.sort((a, b) => a.receivedAt - b.receivedAt);
+  }
+
+  async markRedeemed(pubkey: string, ids: string[]) {
+    const entries = await this.list(pubkey);
+    for (const e of entries) {
+      if (!ids.includes(e.id)) continue;
+      await this.cmd('HSET', `nutcast:inbox:${pubkey}`, e.id, JSON.stringify({ ...e, status: 'redeemed', proofs: [] }));
+    }
+  }
+}
+
 let cached: InboxStore | undefined;
 
 export function getStore(): InboxStore {
   if (cached) return cached;
-  cached = new FileStore(process.env.NUTCAST_DATA_FILE ?? path.join(process.cwd(), '.data', 'inbox.json'));
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  cached =
+    url && token
+      ? new RedisStore(url, token)
+      : new FileStore(process.env.NUTCAST_DATA_FILE ?? path.join(process.cwd(), '.data', 'inbox.json'));
   return cached;
 }
 
