@@ -278,6 +278,37 @@ export default function CreatorPage() {
             ))}
           </section>
 
+          <section className="card">
+            <div className="row between">
+              <h2 style={{ margin: 0 }}>Stream payments</h2>
+              <span className="mono small">
+                {tickSats} sats in {ticks.length}
+              </span>
+            </div>
+            {ticks.length === 0 ? (
+              <p className="muted gap-top">Nothing streamed yet.</p>
+            ) : (
+              <table className="gap-top">
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>Status</th>
+                    <th className="num">Sats</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ticks.slice(0, 20).map((e) => (
+                    <tr key={e.id}>
+                      <td>{new Date(e.receivedAt).toLocaleTimeString()}</td>
+                      <td className="small muted">{e.status}</td>
+                      <td className="num">{e.amount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <p className="muted small gap-top">Stream payments carry no message and never appear among boosts.</p>
+          </section>
         </div>
 
         <div className="col">
