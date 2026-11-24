@@ -82,3 +82,21 @@ describe('real-world feed shapes', () => {
     expect(() => parseFeed('<html></html>')).toThrow();
   });
 });
+
+describe('inbox handshake', () => {
+  test('a creator signature verifies, anything else does not', () => {
+    const kp = newKeyPair();
+    const other = newKeyPair();
+    const { pubkey, ts, sig } = signInbox(kp, 'list');
+    expect(verifyInbox(pubkey, ts, sig, 'list')).toBe(true);
+    expect(verifyInbox(pubkey, ts, sig, 'redeem')).toBe(false);
+    expect(verifyInbox(other.pubkey, ts, sig, 'list')).toBe(false);
+    expect(verifyInbox(pubkey, ts, sig, 'list', ts + 10 * 60 * 1000)).toBe(false);
+  });
+  test('demo identities sign too', () => {
+    for (const d of DEMO_IDENTITIES) {
+      const s = signInbox(d, 'list');
+      expect(verifyInbox(s.pubkey, s.ts, s.sig, 'list')).toBe(true);
+    }
+  });
+});
