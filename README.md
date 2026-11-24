@@ -121,3 +121,36 @@ pay: swap to P2PK-locked proofs  --->  POST /api/ecash
 
 - `<podcast:valueRecipient type="cashu" address="creqA…">` and `<podcast:txt purpose="cashu">` are community conventions, following Nodesignal's CASHU_STREAMING proposal. They are not registered Podcasting 2.0 values.
 - The receive endpoint takes `?action=stream` or `?action=boost`, and `?episode=`, in the same spirit. A stream payment never stores a message.
+
+## Limits, stated plainly
+
+- **Ecash recipients only.** Lightning-address, keysend and nutzap recipients are shown as "not payable here". Their share is never sent and stays in the listener's wallet. Most real feeds today are Lightning-address or keysend, so most real feeds are not payable by this build.
+- **No refund path.** Tokens are locked to the creator with no timelock. If the receiver permanently refuses a delivery, the token stays in the listener's journal and is not automatically recovered.
+- **Closing the tab** does not reliably send what is set aside. It stays recorded and goes out on the next visit.
+- **Small leftovers** under a fee-charging mint can stay set aside at the end of an episode instead of being sent.
+- **The wallet is localStorage**, with random secrets and no seed phrase. The backup token is the only backup.
+- **A mint is a custodian.** Whoever runs the mint holds the bitcoin behind the ecash.
+- **The feed loader** fetches addresses typed by visitors. It allows only https and public addresses, re-checks redirects, and caps size and time, but it does not pin DNS between the check and the fetch. Turn it off (`NUTCAST_FEED_PROXY=off`) if you host this somewhere with a sensitive internal network.
+- English only. No embed button yet.
+
+## Next steps
+
+Lightning-address payouts with per-recipient thresholds, NIP-61 nutzaps, cross-mint payments, a refund key with a timelock, an embeddable button, and an interop test against a Sovereigncast or nutsplit receiver.
+
+## Prior art and thanks
+
+Nutcast is new code, but the ideas are not all new:
+
+- [Hopp](https://gitlab.com/nodesignal/hopp) by Nodesignal: streaming sats with a daily budget over Lightning, and the accrual rules (media time, seeks do not count) this build follows in spirit.
+- [CASHU_STREAMING](https://gitlab.com/nodesignal/podcasting_tools/-/blob/demo/spilman-hackday/CASHU_STREAMING.md): the `purpose="cashu"` tag, the `action=stream` hint and the batching advice.
+- [nutboost](https://github.com/HexboxTools/nutboost): Cashu boosts that honour value-block splits, including Lightning-address, nutzap and cross-mint payouts that Nutcast does not do.
+- [Squirrel](https://github.com/Anthonyushie/squirrel): offline Cashu gifts for creators.
+- [nutsplit](https://github.com/apeirs/nutsplit): show-side ecash receiving.
+
+What Nutcast adds is the listening loop: streaming with a hard budget and a pause that still honours the split, plus a creator inbox to claim and cash out.
+
+AI coding tools were used to write this project.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
