@@ -98,3 +98,43 @@ export function tick(a: Accrual, mediaSeconds: number): Accrual {
 export function setStreaming(a: Accrual, on: boolean): Accrual {
   return a.streaming === on ? a : { ...a, streaming: on };
 }
+
+/** Move every whole sat that is set aside into "in flight" for settlement. */
+export function takeFlush(a: Accrual): { accrual: Accrual; sats: number } {
+  const sats = setAsideSats(a);
+  if (sats <= 0) return { accrual: a, sats: 0 };
+  return {
+    sats,
+    accrual: {
+      ...a,
+      satSeconds: a.satSeconds - sats * 60,
+      inFlightSats: a.inFlightSats + sats,
+    },
+  };
+}
+
+export interface FlushOutcome {
+  /** Sats that reached recipients. */
+  paid: number;
+  /** Mint fees, paid out of the flushed sats. They count against the budget. */
+  fees: number;
+  /** Sats that could not be sent and should be tried again later. */
+  failed: number;
+  /** Sats that were not sent and will not be retried (unpayable recipients, rounding). */
+  kept: number;
+}
+
+/** Record what happened to a flush of `sats` taken with takeFlush. */
+export function settleFlush(a: Accrual, sats: number, o: FlushOutcome): Accrual {
+  if (o.paid + o.fees + o.failed + o.kept !== sats) {
+    throw new Error('flush outcome does not add up to the flushed amount');
+  }
+  const spent = o.paid + o.fees;
+  return {
+    ...a,
+    inFlightSats: Math.max(0, a.inFlightSats - sats),
+    satSeconds: a.satSeconds + o.failed * 60,
+    sentEpisodeSats: a.sentEpisodeSats + spent,
+    sentTodaySats: a.sentTodaySats + spent,
+  };
+}
