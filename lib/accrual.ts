@@ -138,3 +138,18 @@ export function settleFlush(a: Accrual, sats: number, o: FlushOutcome): Accrual 
     sentTodaySats: a.sentTodaySats + spent,
   };
 }
+
+/**
+ * After a reload nothing can still be in flight: whatever was handed to
+ * settlement is either journaled as a pending delivery (already debited from
+ * the wallet) or never left. Count it as spent so the budget stays safe.
+ */
+export function recoverAfterReload(a: Accrual): Accrual {
+  if (a.inFlightSats <= 0) return a;
+  return {
+    ...a,
+    inFlightSats: 0,
+    sentEpisodeSats: a.sentEpisodeSats + a.inFlightSats,
+    sentTodaySats: a.sentTodaySats + a.inFlightSats,
+  };
+}
