@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:podcast="https://podcastindex.org/namespace/1.0">
+  <channel>
+    <title>The Nutcast Demo Show</title>
+    <description>A demo feed for Nutcast. Every recipient is paid in test ecash.</description>
+    <!-- Unofficial: type="cashu" recipients and the purpose="cashu" txt tag are
+         community conventions (CASHU_STREAMING), not registered namespace values. -->
+    <podcast:value type="lightning" method="lnaddress" suggested="0.00000004">
+      <podcast:valueRecipient name="Demo Host" type="cashu" address="creqApWF0gaNhdGRwb3N0YWF4ZWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvZWNhc2g_dG89MDIyNWRmY2EwMmI3ZmIyNzZmZDBiODZlZWU1MGYzNTZmOTc3MjA5YTU2MTNkNTNhOTkzNTc4MzkxODY1M2EzYTEwYWf3YXVjc2F0YW2BeBtodHRwczovL3Rlc3RudXQuY2FzaHUuc3BhY2VhZHJOdXRjYXN0OiBEZW1vIEhvc3RlbnV0MTCjYWtkUDJQS2FkeEIwMjI1ZGZjYTAyYjdmYjI3NmZkMGI4NmVlZTUwZjM1NmY5NzcyMDlhNTYxM2Q1M2E5OTM1NzgzOTE4NjUzYTNhMTBhdPc=" split="80"/>
+      <podcast:valueRecipient name="Demo Guest" type="cashu" address="creqApWF0gaNhdGRwb3N0YWF4ZWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvZWNhc2g_dG89MDI0Y2FiMGI5ZTc5OTQ1MDQzYzRmZjBjYmQwZmQ1OTg0ZjRlZGE5OWEwZWVlNzE2NWJmYmRlYzRiNmI1NTYzMTYyYWf3YXVjc2F0YW2BeBtodHRwczovL3Rlc3RudXQuY2FzaHUuc3BhY2VhZHNOdXRjYXN0OiBEZW1vIEd1ZXN0ZW51dDEwo2FrZFAyUEthZHhCMDI0Y2FiMGI5ZTc5OTQ1MDQzYzRmZjBjYmQwZmQ1OTg0ZjRlZGE5OWEwZWVlNzE2NWJmYmRlYzRiNmI1NTYzMTYyYXT3" split="15"/>
+      <podcast:valueRecipient name="Demo Hosting Co" type="cashu" address="creqApWF0gaNhdGRwb3N0YWF4ZWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvZWNhc2g_dG89MDMyNTVmOGYzYWVlZWU2ODAyNTIwMGZkMjA4ZGIyOGEzZThkOWNhY2U0NWZiOTM4NDllODg5OWJkYWY5NzUwYWRlYWf3YXVjc2F0YW2BeBtodHRwczovL3Rlc3RudXQuY2FzaHUuc3BhY2VhZHgYTnV0Y2FzdDogRGVtbyBIb3N0aW5nIENvZW51dDEwo2FrZFAyUEthZHhCMDMyNTVmOGYzYWVlZWU2ODAyNTIwMGZkMjA4ZGIyOGEzZThkOWNhY2U0NWZiOTM4NDllODg5OWJkYWY5NzUwYWRlYXT3" split="5" fee="true"/>
+    </podcast:value>
+    <podcast:txt purpose="cashu">creqApWF0gaNhdGRwb3N0YWF4ZWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvZWNhc2g_dG89MDIyNWRmY2EwMmI3ZmIyNzZmZDBiODZlZWU1MGYzNTZmOTc3MjA5YTU2MTNkNTNhOTkzNTc4MzkxODY1M2EzYTEwYWf3YXVjc2F0YW2BeBtodHRwczovL3Rlc3RudXQuY2FzaHUuc3BhY2VhZHJOdXRjYXN0OiBEZW1vIEhvc3RlbnV0MTCjYWtkUDJQS2FkeEIwMjI1ZGZjYTAyYjdmYjI3NmZkMGI4NmVlZTUwZjM1NmY5NzcyMDlhNTYxM2Q1M2E5OTM1NzgzOTE4NjUzYTNhMTBhdPc=</podcast:txt>
+    <item>
+      <title>Episode 1: Four chords and a budget</title>
+      <guid isPermaLink="false">nutcast-demo-episode-1</guid>
+      <enclosure url="http://localhost:3000/demo-episode.mp3" type="audio/mpeg" length="1203427"/>
+    </item>
+  </channel>
+</rss>
