@@ -91,3 +91,17 @@ describe('accrual', () => {
     expect(a.sentEpisodeSats).toBe(10);
   });
 });
+
+describe('heardSeconds', () => {
+  test('normal playback counts', () => {
+    expect(heardSeconds(10, 10.25)).toBeCloseTo(0.25);
+  });
+  test('faster playback counts more media time', () => {
+    expect(heardSeconds(10, 10.5)).toBeCloseTo(0.5);
+  });
+  test('seeking forward or back does not count', () => {
+    expect(heardSeconds(10, 200)).toBe(0);
+    expect(heardSeconds(200, 10)).toBe(0);
+    expect(heardSeconds(10, 10)).toBe(0);
+  });
+});
