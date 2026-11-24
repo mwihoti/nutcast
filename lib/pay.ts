@@ -209,3 +209,21 @@ export async function paySplit(
     deferred: 0,
   };
 }
+
+/** Re-send journaled deliveries. Call on page load and after reconnecting. */
+export async function retryDeliveries(kv: KV, ns: string, fetchImpl: typeof fetch = fetch): Promise<number> {
+  let delivered = 0;
+  for (const d of loadJournal(kv, ns)) {
+    if (d.dead) continue;
+    d.attempts += 1;
+    const outcome = await attempt(d, fetchImpl);
+    if (outcome === 'done') {
+      delivered += 1;
+      updateJournal(kv, ns, (l) => l.filter((x) => x.id !== d.id));
+    } else {
+      d.dead = outcome === 'dead';
+      updateJournal(kv, ns, (l) => l.map((x) => (x.id === d.id ? d : x)));
+    }
+  }
+  return delivered;
+}
