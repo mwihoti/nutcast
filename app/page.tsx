@@ -735,6 +735,54 @@ export default function ListenerPage() {
             )}
           </section>
 
+          <section className="card">
+            <h2>Boost with a message</h2>
+            <div className="stack">
+              <div className="row" style={{ alignItems: 'flex-end' }}>
+                <label className="field" style={{ flex: 1 }}>
+                  Sats
+                  <input
+                    type="number"
+                    min={1}
+                    max={100000}
+                    value={boostAmount}
+                    onChange={(e) => setBoostAmount(clampInt(e.target.value, 0, 100000))}
+                  />
+                </label>
+                <label className="field" style={{ flex: 2 }}>
+                  Your name (optional)
+                  <input type="text" maxLength={40} value={boostName} onChange={(e) => setBoostName(e.target.value)} />
+                </label>
+              </div>
+              <label className="field">
+                Message
+                <textarea
+                  maxLength={300}
+                  value={boostMessage}
+                  placeholder="Great episode, thank you!"
+                  onChange={(e) => setBoostMessage(e.target.value)}
+                />
+              </label>
+              {boostPlan && (
+                <p className="muted small mono">
+                  {boostPlan.shares
+                    .filter((s) => s.sats > 0)
+                    .map((s) => `${s.recipient.name || 'recipient'} ${s.sats}${s.rail === 'cashu' ? '' : ' (kept)'}`)
+                    .join('  ·  ')}
+                </p>
+              )}
+              <button
+                type="button"
+                className="btn"
+                onClick={sendBoost}
+                disabled={boosting || !boostPlan || boostPlan.payable <= 0 || balance < boostPlan.payable}
+              >
+                {boosting ? 'Sending…' : `Send ${boostPlan?.payable ?? 0} sats`}
+              </button>
+              {boostPlan && balance < boostPlan.payable && <p className="muted small">Not enough balance for this boost.</p>}
+            </div>
+          </section>
+
         </div>
       </div>
     </main>
