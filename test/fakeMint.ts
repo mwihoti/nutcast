@@ -43,7 +43,7 @@ export interface FakeMint {
 }
 
 export async function startFakeMint(
-  opts: { feePpk?: number; port?: number; cors?: boolean } = {},
+  opts: { feePpk?: number; port?: number; cors?: boolean; payDelayMs?: number } = {},
 ): Promise<FakeMint> {
   const feePpk = opts.feePpk ?? 0;
   const pair = createNewMintKeys(20, randomBytes(32), { input_fee_ppk: feePpk, unit: 'sat' });
@@ -129,9 +129,12 @@ export async function startFakeMint(
         quote: hex(randomBytes(12)),
         request: fakeInvoice(Number(body.amount)),
         amount: Number(body.amount),
-        state: 'PAID', // FakeWallet behaviour: every invoice is paid at once.
+        // FakeWallet behaviour: every invoice gets paid by itself. With
+        // payDelayMs it stays unpaid for a moment, like a real payment would.
+        state: opts.payDelayMs ? 'UNPAID' : 'PAID',
       };
       mintQuotes.set(q.quote, q);
+      if (opts.payDelayMs) setTimeout(() => (q.state = 'PAID'), opts.payDelayMs).unref();
       return { ...q, unit: 'sat', expiry: Math.floor(Date.now() / 1000) + 3600 };
     }
     if (method === 'GET' && path.startsWith('/v1/mint/quote/bolt11/')) {

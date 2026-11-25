@@ -10,7 +10,7 @@ Built in November 2026 for [Nut November](https://nutnovember.org/), Value4Value
 
 **For listeners** (`/`)
 
-- A Cashu wallet in the browser: top up from a Lightning invoice, see the balance, export a backup token.
+- A Cashu wallet in the browser: top up from a Lightning invoice shown as a scannable QR code, see the balance, export a backup token.
 - **Streaming sats**: pick sats per minute, an episode budget and a daily budget. Only audio you actually hear counts; seeking does not. "Pause streaming" stops paying at once while playback carries on.
 - **A budget that is a hard limit**: mint fees are paid out of the budget, never on top of it. The cost of each payment is read from the prepared swap before anything is sent.
 - **Boost with a message**: an amount and a note, split the same way.
@@ -60,7 +60,7 @@ npm run fake-mint                                  # http://127.0.0.1:3338
 NUTCAST_MINTS=http://127.0.0.1:3338 npm run dev    # in a second terminal
 ```
 
-For the cash-out step, paste any invoice-shaped string such as `lnbcrt400n1qpzry9x8gf2tvdw0s3jn54khce6mua7l` (40 sats); "Get a test invoice" needs the public test mints.
+Run the fake mint with `PAY_DELAY_MS=8000` to keep each invoice unpaid for a few seconds, so the invoice screen stays visible. For the cash-out step, paste any invoice-shaped string such as `lnbcrt400n1qpzry9x8gf2tvdw0s3jn54khce6mua7l` (40 sats); "Get a test invoice" needs the public test mints.
 
 ## Checks
 
