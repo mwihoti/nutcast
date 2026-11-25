@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Wallet, type MeltQuoteBolt11Response } from '@cashu/cashu-ts';
 import { Copy } from '@/components/Copy';
+import { InvoiceQR } from '@/components/InvoiceQR';
 import { DEMO_IDENTITIES } from '@/lib/demo';
 import { fromPrivkey, makeCreq, newKeyPair, secondTestMint, signInbox, type KeyPair } from '@/lib/keys';
 import type { InboxEntry } from '@/lib/store';
@@ -429,9 +430,18 @@ export default function CreatorPage() {
           <section className="card">
             <h2>Get paid</h2>
             <p className="small">Your payment request (NUT-18, reusable, any amount):</p>
-            <div className="code gap-top">{creq}</div>
-            <div className="row gap-top">
-              <Copy text={creq} label="Copy request" />
+            <div className="gap-top">
+              <InvoiceQR
+                title="Ecash payment request"
+                value={creq}
+                copyLabel="Copy request"
+                rows={[
+                  { label: 'Amount', value: 'Any' },
+                  { label: 'Unit', value: 'SAT' },
+                  { label: 'Locked to', value: `${me.pubkey.slice(0, 8)}…${me.pubkey.slice(-4)}` },
+                  { label: 'Method', value: 'NUT-18' },
+                ]}
+              />
             </div>
             <p className="small gap-top">To receive a share of a show, add this to the feed’s value block:</p>
             <div className="code gap-top">{snippet}</div>

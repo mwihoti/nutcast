@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { decodePaymentRequest } from '@cashu/cashu-ts';
 import { Copy } from '@/components/Copy';
+import { InvoiceQR } from '@/components/InvoiceQR';
 import {
   capReached,
   heardSeconds,
@@ -725,12 +726,32 @@ export default function ListenerPage() {
             </div>
             {fund && (
               <div className="stack gap-top">
+                <InvoiceQR
+                  title="Lightning invoice"
+                  value={fund.request}
+                  uppercase
+                  copyLabel="Copy invoice"
+                  rows={[
+                    { label: 'Amount', value: `${fund.amount}` },
+                    { label: 'Unit', value: 'SAT' },
+                    { label: 'State', value: 'Pending' },
+                    { label: 'Method', value: 'Bolt11' },
+                  ]}
+                />
                 <p className="small">
-                  Lightning invoice for {fund.amount} sats. On a real mint you would pay this from any Lightning wallet.
-                  The test mint marks it paid by itself.
+                  Scan or copy this into any Lightning wallet to pay it. A test mint marks it paid by itself; the balance
+                  updates as soon as the mint sees the payment.
                 </p>
-                <div className="code">{fund.request}</div>
-                <p className="muted small">Waiting for the mint…</p>
+                <button
+                  type="button"
+                  className="btn ghost small"
+                  onClick={() => {
+                    walletRef.current?.cancelFund();
+                    setFund(undefined);
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
             )}
           </section>
